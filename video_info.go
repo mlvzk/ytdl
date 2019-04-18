@@ -42,9 +42,9 @@ type VideoInfo struct {
 	// Author of the video
 	Author string `json:"author"`
 	// Duration of the video
-	Duration time.Duration
+	Duration time.Duration `json:"duration"`
 
-	htmlPlayerFile string
+	HtmlPlayerFile string `json:"htmlPlayerFile"`
 }
 
 // GetVideoInfo fetches info from a url string, url object, or a url string
@@ -109,7 +109,7 @@ func GetVideoInfoFromID(id string) (*VideoInfo, error) {
 
 // GetDownloadURL gets the download url for a format
 func (info *VideoInfo) GetDownloadURL(format Format) (*url.URL, error) {
-	return getDownloadURL(format, info.htmlPlayerFile)
+	return getDownloadURL(format, info.HtmlPlayerFile)
 }
 
 // GetThumbnailURL returns a url for the thumbnail image
@@ -265,7 +265,7 @@ func getVideoInfoFromHTML(id string, html []byte) (*VideoInfo, error) {
 		return vals
 	}
 	info.Keywords = parseKey("keywords")
-	info.htmlPlayerFile = jsonConfig["assets"].(map[string]interface{})["js"].(string)
+	info.HtmlPlayerFile = jsonConfig["assets"].(map[string]interface{})["js"].(string)
 
 	/*
 		fmtList := parseKey("fmt_list")
@@ -306,13 +306,13 @@ func getVideoInfoFromHTML(id string, html []byte) (*VideoInfo, error) {
 			itag, _ := strconv.Atoi(query.Get("itag"))
 			if format, ok := newFormat(itag); ok {
 				if strings.HasPrefix(query.Get("conn"), "rtmp") {
-					format.meta["rtmp"] = true
+					format.Meta["rtmp"] = true
 				}
 				for k, v := range query {
 					if len(v) == 1 {
-						format.meta[k] = v[0]
+						format.Meta[k] = v[0]
 					} else {
-						format.meta[k] = v
+						format.Meta[k] = v
 					}
 				}
 				formats = append(formats, format)
@@ -325,7 +325,7 @@ func getVideoInfoFromHTML(id string, html []byte) (*VideoInfo, error) {
 	}
 
 	if dashManifestURL, ok := inf["dashmpd"].(string); ok {
-		tokens, err := getSigTokens(info.htmlPlayerFile)
+		tokens, err := getSigTokens(info.HtmlPlayerFile)
 		if err != nil {
 			return nil, fmt.Errorf("Unable to extract signature tokens: %s", err.Error())
 		}
@@ -383,7 +383,7 @@ func getDashManifest(urlString string) (formats []Format, err error) {
 				break
 			}
 			if format, ok := newFormat(rep.Itag); ok {
-				format.meta["url"] = rep.URL
+				format.Meta["url"] = rep.URL
 				if rep.Height != 0 {
 					format.Resolution = strconv.Itoa(rep.Height) + "p"
 				} else {

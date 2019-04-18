@@ -18,18 +18,18 @@ const (
 
 // Format is a youtube is a static youtube video format
 type Format struct {
-	Itag          int    `json:"itag"`
-	Extension     string `json:"extension"`
-	Resolution    string `json:"resolution"`
-	VideoEncoding string `json:"videoEncoding"`
-	AudioEncoding string `json:"audioEncoding"`
-	AudioBitrate  int    `json:"audioBitrate"`
-	meta          map[string]interface{}
+	Itag          int                    `json:"itag"`
+	Extension     string                 `json:"extension"`
+	Resolution    string                 `json:"resolution"`
+	VideoEncoding string                 `json:"videoEncoding"`
+	AudioEncoding string                 `json:"audioEncoding"`
+	AudioBitrate  int                    `json:"audioBitrate"`
+	Meta          map[string]interface{} `json:"meta"`
 }
 
 func newFormat(itag int) (Format, bool) {
 	if f, ok := FORMATS[itag]; ok {
-		f.meta = make(map[string]interface{})
+		f.Meta = make(map[string]interface{})
 		return f, true
 	}
 	return Format{}, false
@@ -51,8 +51,8 @@ func (f Format) ValueForKey(key FormatKey) interface{} {
 	case FormatAudioBitrateKey:
 		return f.AudioBitrate
 	default:
-		if f.meta != nil {
-			return f.meta[string(key)]
+		if f.Meta != nil {
+			return f.Meta[string(key)]
 		}
 		return nil
 	}
